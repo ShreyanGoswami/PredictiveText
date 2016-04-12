@@ -41,7 +41,7 @@ public class Database {
                 String word = rs.getString("word");
                 System.out.println(word);
             }
-            return rs;
+            
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -52,11 +52,6 @@ public class Database {
         ResultSet rs = null;
         try {
             rs = stmt.executeQuery(sql);
-            while (rs.next()) {
-                String word = rs.getString("word");
-                System.out.println(word);
-            }
-            return rs;
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
