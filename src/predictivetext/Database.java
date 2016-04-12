@@ -26,6 +26,7 @@ public class Database{
     void modifyDB(String sql){
         try{
             stmt.executeUpdate(sql);
+            System.out.println("Hello");
         }catch(Exception e){
             System.out.println(e.getMessage());
         }
