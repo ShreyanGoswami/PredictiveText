@@ -38,8 +38,8 @@ public class NewJFrame extends javax.swing.JFrame {
         jTextArea1.setColumns(20);
         jTextArea1.setRows(5);
         jTextArea1.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyTyped(java.awt.event.KeyEvent evt) {
-                jTextArea1KeyTyped(evt);
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                jTextArea1KeyReleased(evt);
             }
         });
         jScrollPane1.setViewportView(jTextArea1);
@@ -75,10 +75,32 @@ public class NewJFrame extends javax.swing.JFrame {
         jTextArea1.setText("");
     }//GEN-LAST:event_jButton1ActionPerformed
 
-    private void jTextArea1KeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextArea1KeyTyped
-        // TODO add your handling code here:
+    private void jTextArea1KeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextArea1KeyReleased
         char ch = evt.getKeyChar();
-        if (ch == ' ') {
+        if (ch != ' ' && ch != '.') //suggest current word
+        {
+            String sentence = jTextArea1.getText();
+            if (sentence.length() > 0) {
+                char[] words = sentence.toCharArray();
+
+                StringBuffer currword = new StringBuffer("");
+                int i = words.length - 1;
+                while (i >= 0 && words[i] != ' ') {
+                    currword = currword.append(words[i]);
+                    i--;
+                }
+                currword = currword.reverse();
+                String s = "select word from singles where word like'" + currword + "%' order by count DESC limit 3";
+                try {
+                    ResultSet rs = db.getData(s);
+                    while (rs.next()) {
+                        System.out.println(rs.getString("word"));
+                    }
+                } catch (Exception e) {
+                    System.out.println(e.getMessage());
+                }
+            }
+        } else if (ch == ' ') {
             String sentence = jTextArea1.getText();
             String[] words = sentence.split(" ");
             String currword = words[words.length - 1];
@@ -92,29 +114,13 @@ public class NewJFrame extends javax.swing.JFrame {
                 System.out.println(e.getMessage());
             }
             //suggest next word
-        } else {
-            //suggest current word
-            String sentence = jTextArea1.getText();
-            String[] words = sentence.split(" ");
-            String currword = words[words.length - 1];
-            String s = "select word from singles where word like'" + currword + "%' order by count DESC limit 3";
-            try {
-                ResultSet rs = db.getData(s);
-                while (rs.next()) {
-                    System.out.println(rs.getString("next"));
-                }
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-            }
-        }
-
-        //create word pairs and single words
-        if (ch == '.') {
+        } //create word pairs and single words
+        else if (ch == '.') {
 
             String sentence = jTextArea1.getText();
             String[] words = sentence.split(" ");
 
-            String[][] pairs = new String[words.length-1][2];
+            String[][] pairs = new String[words.length - 1][2];
             for (int i = 0; i < words.length - 1; i++) {
                 pairs[i][0] = words[i];
                 pairs[i][1] = words[i + 1];
@@ -122,7 +128,7 @@ public class NewJFrame extends javax.swing.JFrame {
 
             for (int i = 0; i < pairs.length; i++) {
                 System.out.println(pairs[i][0] + "," + pairs[i][1]);
-                
+
             }
             for (int i = 0; i < words.length; i++) {
                 try {
@@ -147,7 +153,7 @@ public class NewJFrame extends javax.swing.JFrame {
             //words pairs
             for (int i = 0; i < pairs.length; i++) {
                 try {
-                    String s = "select curr,next from pairs where curr='"+pairs[i][0]+"' and next='"+pairs[i][1]+"'";
+                    String s = "select curr,next from pairs where curr='" + pairs[i][0] + "' and next='" + pairs[i][1] + "'";
                     ResultSet rs = db.getData(s);
                     boolean flag = false;
                     while (rs.next()) {
@@ -155,10 +161,10 @@ public class NewJFrame extends javax.swing.JFrame {
                         break;
                     }
                     if (flag == true) {
-                        s = "update pairs set count=count+1 where curr='"+pairs[i][0]+"' and next='"+pairs[i][1]+"'";
+                        s = "update pairs set count=count+1 where curr='" + pairs[i][0] + "' and next='" + pairs[i][1] + "'";
                         db.modifyDB(s);
                     } else {
-                        s="insert into pairs values ('"+pairs[i][0]+"','"+pairs[i][1]+"',1)";
+                        s = "insert into pairs values ('" + pairs[i][0] + "','" + pairs[i][1] + "',1)";
                         db.modifyDB(s);
                     }
                 } catch (Exception e) {
@@ -166,7 +172,7 @@ public class NewJFrame extends javax.swing.JFrame {
                 }
             }
         }
-    }//GEN-LAST:event_jTextArea1KeyTyped
+    }//GEN-LAST:event_jTextArea1KeyReleased
 
     /**
      * @param args the command line arguments
