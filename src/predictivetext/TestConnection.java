@@ -13,7 +13,9 @@ public class TestConnection {
     public static void main(String args[]){
         Database obj=new Database("test");
         
-        String str="create table singles(word varchar(30),int count,primary key(word))";
+        String str="create table singles(word varchar(30),count int,primary key(word))";
+        obj.modifyDB(str);
+        str="create table pairs(curr varchar(30),next varchar(30),count int,primary key(curr,next))";
         obj.modifyDB(str);
         
         

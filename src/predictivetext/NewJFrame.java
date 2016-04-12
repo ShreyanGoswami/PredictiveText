@@ -91,19 +91,20 @@ public class NewJFrame extends javax.swing.JFrame {
             String sentence = jTextArea1.getText();
             String[] words = sentence.split(" ");
 
-            String[][] pairs = new String[words.length][2];
+            String[][] pairs = new String[words.length-1][2];
             for (int i = 0; i < words.length - 1; i++) {
                 pairs[i][0] = words[i];
                 pairs[i][1] = words[i + 1];
             }
 
-            for (int i = 0; i < words.length - 1; i++) {
+            for (int i = 0; i < pairs.length; i++) {
                 System.out.println(pairs[i][0] + "," + pairs[i][1]);
+                
             }
             for (int i = 0; i < words.length; i++) {
                 try {
                     String s = "select word from singles where word='" + words[i] + "'";
-                    ResultSet rs = db.getSingles(s);
+                    ResultSet rs = db.getData(s);
                     boolean flag = false;
                     while (rs.next()) {
                         flag = true;
@@ -114,6 +115,27 @@ public class NewJFrame extends javax.swing.JFrame {
                         db.modifyDB(s);
                     } else {
                         s = "insert into singles values ('" + words[i] + "','1')";
+                        db.modifyDB(s);
+                    }
+                } catch (Exception e) {
+                    System.out.println(e.getMessage());
+                }
+            }
+            //words pairs
+            for (int i = 0; i < pairs.length; i++) {
+                try {
+                    String s = "select curr,next from pairs where curr='"+pairs[i][0]+"' and next='"+pairs[i][1]+"'";
+                    ResultSet rs = db.getData(s);
+                    boolean flag = false;
+                    while (rs.next()) {
+                        flag = true;
+                        break;
+                    }
+                    if (flag == true) {
+                        s = "update pairs set count=count+1 where curr='"+pairs[i][0]+"' and next='"+pairs[i][1]+"'";
+                        db.modifyDB(s);
+                    } else {
+                        s="insert into pairs values ('"+pairs[i][0]+"','"+pairs[i][1]+"',1)";
                         db.modifyDB(s);
                     }
                 } catch (Exception e) {

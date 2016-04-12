@@ -33,17 +33,7 @@ public class Database {
         }
     }
 
-    ResultSet getSingles(String sql) {
-        ResultSet rs = null;
-        try {
-            rs = stmt.executeQuery(sql);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-        return rs;
-    }
-    
-    ResultSet getPairs(String sql) {
+    ResultSet getData(String sql) {
         ResultSet rs = null;
         try {
             rs = stmt.executeQuery(sql);
