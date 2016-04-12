@@ -13,8 +13,9 @@ public class TestConnection {
     public static void main(String args[]){
         Database obj=new Database("test");
         
-        String str="insert into single values('Hello',1)";
+        String str="create table singles(word varchar(30),int count,primary key(word))";
         obj.modifyDB(str);
+        
         
                 
     }
