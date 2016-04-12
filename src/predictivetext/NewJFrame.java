@@ -79,10 +79,33 @@ public class NewJFrame extends javax.swing.JFrame {
         // TODO add your handling code here:
         char ch = evt.getKeyChar();
         if (ch == ' ') {
-
+            String sentence = jTextArea1.getText();
+            String[] words = sentence.split(" ");
+            String currword = words[words.length - 1];
+            String s = "select next from pairs where curr='" + currword + "' order by count DESC limit 3";
+            try {
+                ResultSet rs = db.getData(s);
+                while (rs.next()) {
+                    System.out.println(rs.getString("next"));
+                }
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
             //suggest next word
         } else {
             //suggest current word
+            String sentence = jTextArea1.getText();
+            String[] words = sentence.split(" ");
+            String currword = words[words.length - 1];
+            String s = "select word from singles where word like'" + currword + "%' order by count DESC limit 3";
+            try {
+                ResultSet rs = db.getData(s);
+                while (rs.next()) {
+                    System.out.println(rs.getString("next"));
+                }
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
         }
 
         //create word pairs and single words
