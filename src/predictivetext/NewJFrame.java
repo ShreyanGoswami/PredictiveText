@@ -1,5 +1,6 @@
 package predictivetext;
 
+import java.awt.event.KeyEvent;
 import java.sql.*;
 
 /**
@@ -15,7 +16,7 @@ public class NewJFrame extends javax.swing.JFrame {
 
     public NewJFrame() {
         initComponents();
-        db = new Database("test");
+        db = new Database("database");
     }
 
     @SuppressWarnings("unchecked")
@@ -25,6 +26,10 @@ public class NewJFrame extends javax.swing.JFrame {
         jButton1 = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTextArea1 = new javax.swing.JTextArea();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jList1 = new javax.swing.JList<>();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -44,27 +49,47 @@ public class NewJFrame extends javax.swing.JFrame {
         });
         jScrollPane1.setViewportView(jTextArea1);
 
+        jList1.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                jList1KeyReleased(evt);
+            }
+        });
+        jScrollPane2.setViewportView(jList1);
+
+        jLabel1.setText("Press down arrow to select the list");
+
+        jLabel2.setText("Use right arrow to select word");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(179, 179, 179)
-                .addComponent(jButton1)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(127, Short.MAX_VALUE)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(107, 107, 107))
+                .addGap(34, 34, 34)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 333, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(27, 27, 27)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel1)
+                    .addComponent(jButton1)
+                    .addComponent(jLabel2))
+                .addContainerGap(158, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(20, 20, 20)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(38, 38, 38)
-                .addComponent(jButton1)
-                .addContainerGap(123, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jScrollPane1)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jLabel2)
+                        .addGap(14, 14, 14)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 42, Short.MAX_VALUE)
+                        .addComponent(jButton1)))
+                .addGap(41, 41, 41))
         );
 
         pack();
@@ -76,7 +101,48 @@ public class NewJFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jTextArea1KeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextArea1KeyReleased
-        char ch = evt.getKeyChar();
+        int keyCode = evt.getKeyCode();
+        if (keyCode == KeyEvent.VK_DOWN) {
+            jList1.requestFocusInWindow();
+        } else {
+            predict(evt.getKeyChar());
+        }
+    }//GEN-LAST:event_jTextArea1KeyReleased
+
+    private void jList1KeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jList1KeyReleased
+        // TODO add your handling code here:
+        int keyCode = evt.getKeyCode();
+        switch (keyCode) {
+            case KeyEvent.VK_LEFT:
+                // handle left
+                jTextArea1.requestFocus();
+                break;
+            case KeyEvent.VK_RIGHT:
+                // handle right
+                String item = jList1.getSelectedValue();
+                if (item.equals("") == false) {
+                    String sentence = jTextArea1.getText();
+                    if (sentence.length() > 0) {
+                        char[] words = sentence.toCharArray();
+
+                        StringBuffer currword = new StringBuffer("");
+                        int i = words.length - 1;
+                        while (i >= 0 && words[i] != ' ') {
+                            currword = currword.append(words[i]);
+                            i--;
+                        }
+                        currword = currword.reverse();
+                        item = item.substring(currword.length(), item.length()) + " ";
+                        System.out.println(item);
+                        jTextArea1.append(item);
+                        predict(' ');
+                        jTextArea1.requestFocus();
+                        break;
+                    }
+                }
+        }
+    }//GEN-LAST:event_jList1KeyReleased
+    private void predict(char ch) {
         if (ch != ' ' && ch != '.') //suggest current word
         {
             String sentence = jTextArea1.getText();
@@ -93,9 +159,15 @@ public class NewJFrame extends javax.swing.JFrame {
                 String s = "select word from singles where word like'" + currword + "%' order by count DESC limit 3";
                 try {
                     ResultSet rs = db.getData(s);
+                    String[] p = new String[1];
+                    p[0] = "";
+                    jList1.setListData(p);
+                    String x = "";
                     while (rs.next()) {
-                        System.out.println(rs.getString("word"));
+                        x = x + rs.getString("word") + ",";
                     }
+                    String[] w = x.split(",");
+                    jList1.setListData(w);
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
                 }
@@ -104,12 +176,19 @@ public class NewJFrame extends javax.swing.JFrame {
             String sentence = jTextArea1.getText();
             String[] words = sentence.split(" ");
             String currword = words[words.length - 1];
+            System.out.println(currword);
             String s = "select next from pairs where curr='" + currword + "' order by count DESC limit 3";
             try {
                 ResultSet rs = db.getData(s);
+                String[] p = new String[1];
+                p[0] = "";
+                jList1.setListData(p);
+                String x = "";
                 while (rs.next()) {
-                    System.out.println(rs.getString("next"));
+                    x = x + rs.getString("next") + ",";
                 }
+                String[] w = x.split(",");
+                jList1.setListData(w);
             } catch (Exception e) {
                 System.out.println(e.getMessage());
             }
@@ -118,6 +197,7 @@ public class NewJFrame extends javax.swing.JFrame {
         else if (ch == '.') {
 
             String sentence = jTextArea1.getText();
+            sentence = sentence.substring(0, (sentence.length() - 1));
             String[] words = sentence.split(" ");
 
             String[][] pairs = new String[words.length - 1][2];
@@ -172,7 +252,7 @@ public class NewJFrame extends javax.swing.JFrame {
                 }
             }
         }
-    }//GEN-LAST:event_jTextArea1KeyReleased
+    }
 
     /**
      * @param args the command line arguments
@@ -211,7 +291,11 @@ public class NewJFrame extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JList<String> jList1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTextArea jTextArea1;
     // End of variables declaration//GEN-END:variables
 }

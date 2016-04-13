@@ -11,7 +11,7 @@ import java.sql.*;
  */
 public class TestConnection {
     public static void main(String args[]){
-        Database obj=new Database("test");
+        Database obj=new Database("database");
         
         String str="create table singles(word varchar(30),count int,primary key(word))";
         obj.modifyDB(str);
